@@ -1,6 +1,37 @@
 # elephantsql_cli
+[![PyPI version](https://badge.fury.io/py/elephantsql-cli.svg)](https://badge.fury.io/py/elephantsql-cli)
 
 CLI implementation of the ElephantSQL API
+
+## Usage:
+
+Install using pip
+    
+    $ pip install elephantsql-cli
+
+Register your API token
+   
+    $ elephant register  # this will prompt you to add your API token
+
+List backups:
+    
+    $ elephant backups [--db=my_database]
+
+
+Create backups:
+    
+    $ elephant backup [--db=my_database]
+
+
+Restore backup:
+   
+    $ elephant restore backup_id
+
+
+List alarms:
+
+    $ elephant alarms
+
 
 ## Project Features
 

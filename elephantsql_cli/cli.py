@@ -147,7 +147,7 @@ def version():
 @cli.command()
 @click.option('--db', type=click.STRING)
 @pass_ctx
-def list_backups(ctx, db):
+def backups(ctx, db):
     """
     Lists available backups
     """
