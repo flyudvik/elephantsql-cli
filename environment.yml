@@ -1,0 +1,3 @@
+name: elephantsql_cli
+dependencies:
+        - python=3.6
