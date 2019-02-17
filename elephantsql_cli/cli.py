@@ -36,6 +36,9 @@ LOGGING_LEVELS = {
 
 
 def mkdir_p(path):
+    """
+    Emulates usage of `mkdir -p /folder/to/create`
+    """
     try:
         os.makedirs(path)
     except OSError as exc:  # Python >2.5
@@ -55,12 +58,12 @@ class Context(object):
         self._api_token = None
         self.api_url = 'https://api.elephantsql.com/api'
         self.conf_dir = os.path.expanduser('~/.local/share/elephantsql-cli/')
-        # TODO: replace with config file
         self.conf_file = os.path.join(self.conf_dir, 'elephantsql.txt')
         mkdir_p(self.conf_dir)
 
     @property
     def api_token(self):
+        """Read API token from file"""
         if self._api_token is None:
             with open(self.conf_file, 'r') as conf:
                 self._api_token = conf.readline()
@@ -70,6 +73,7 @@ class Context(object):
 
     @api_token.setter
     def api_token(self, api_token):
+        """Set and save API token"""
         self._api_token = api_token
         click.echo(f'api token = {api_token}')
         with open(self.conf_file, 'w') as conf:
@@ -77,6 +81,7 @@ class Context(object):
 
     @property
     def session(self):
+        """Generate pre-authenticated requests session"""
         session = requests.Session()
         session.auth = (None, self.api_token)
         return session
@@ -97,7 +102,7 @@ pass_ctx = click.make_pass_decorator(
 @pass_ctx
 def cli(ctx: Context, verbose: int):
     """
-    Run elephant.
+    ElephantSQL CLI entrypoint
     """
     # Use the verbosity count to determine the logging level...
     if verbose > 0:
@@ -120,6 +125,14 @@ def cli(ctx: Context, verbose: int):
 @click.option('--api-token', prompt=True)
 @pass_ctx
 def register(ctx, api_token):
+    """
+    Saves API TOKEN from ElephantSQL.
+
+    Usage
+        $ elephant register
+    :param api_token: token retrieved from elephantsql.com
+    :return:
+    """
     ctx.api_token = api_token
 
 
@@ -135,6 +148,9 @@ def version():
 @click.option('--db', type=click.STRING)
 @pass_ctx
 def list_backups(ctx, db):
+    """
+    Lists available backups
+    """
     query = {}
     if db:
         query['db'] = db
@@ -148,6 +164,9 @@ def list_backups(ctx, db):
 @click.option('--db', type=click.STRING)
 @pass_ctx
 def backup(ctx, db):
+    """
+    Creates backup for specified database, or for all
+    """
     query = {}
     if db:
         query['db'] = db
@@ -159,27 +178,21 @@ def backup(ctx, db):
 @click.argument('backup_id', type=click.INT)
 @pass_ctx
 def restore(ctx, backup_id):
+    """
+    Restores database by backup_id
+    """
     response = ctx.session.post(f'{ctx.api_url}/backup', data={
         'backup_id': backup_id,
     })
     click.echo(response.status_code)
 
 
-#  TODO: PITR
-# @cli.command()
-# @click.option('backup_id', type=click.INT)
-# @pass_ctx
-# def point_in_time_recovery(ctx, backup_id):
-#     time_to_recover = ''
-#     response = ctx.session.post(f'{ctx.api_url}/backup/pitr', data={
-#         'pit': time_to_recover,
-#     })
-#     click.echo(response.status_code)
-
-
 @cli.command()
 @pass_ctx
 def alarms(ctx):
+    """
+    Get list of active alarms
+    """
     response = ctx.session.get(f'{ctx.api_url}/alarms')
 
     click.echo(response.status_code)
